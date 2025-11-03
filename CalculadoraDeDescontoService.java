@@ -5,12 +5,11 @@ public class CalculadoraDeDescontoService {
 
     private List<IFormaDescontoTaxaEntrega> metodosDesconto;
 
-    public CalculadoraDeDescontoService(List<IFormaDescontoTaxaEntrega> metodos) {
-        this.metodosDesconto = metodos;
+    public CalculadoraDeDescontoService() {
+        this.metodosDesconto = List.of(new FormaDescontoTaxaPorBairro(),new FormaDescontoTaxaPorTipoCliente(), new FormaDescontoTipoItem(), new FormaDescontoValorPedido(200.0));
     }
 
-    public List<CupomDescontoEntrega> calcularDesconto(Pedido pedido) {
-        List<CupomDescontoEntrega> cupons = new ArrayList<>();
+    public void calcularDesconto(Pedido pedido) {
 
         double limiteMaximo = 10.0;
         double acumulado = 0.0;
@@ -29,18 +28,15 @@ public class CalculadoraDeDescontoService {
             if (valorRestante > 0) {
                 cupom = new CupomDescontoEntrega(cupom.getNomeMetodo() + " (parcial)", valorRestante);
                 pedido.aplicarDesconto(cupom);
-                cupons.add(cupom);
                 acumulado += valorRestante;
             }
                 break;
             } else {
                 pedido.aplicarDesconto(cupom);
-                cupons.add(cupom);
                 acumulado += valorCupom;
            }
           }
          }
         }
-        return cupons;
     }
 }
