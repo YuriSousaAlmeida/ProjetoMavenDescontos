@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -6,14 +7,15 @@ import java.util.ArrayList;
 public class Pedido {
 
     private double taxaDeEntrega=10.00;
-
+    private LocalDateTime data;
     private Cliente cliente;
     private List<Item> itens=new ArrayList<>();
     private List<CupomDescontoEntrega> cupomDescontoEntrega=new ArrayList<>();
+    private CupomDescontoPedido cupomDescontoPedido;
 
-    public Pedido(LocalDate data, Cliente cliente) {
+    public Pedido(LocalDateTime data, Cliente cliente) {
         this.cliente = cliente;
-        LocalDate dataEntrega = LocalDate.now();
+        this.data = data;
     }
 
     public void adicionarItem(Item item){
@@ -21,12 +23,24 @@ public class Pedido {
     }
 
     public double getValorPedido(){
-        double valorTotal=0;
-        for(Item item:itens){
-            valorTotal+=item.getValorTotal();
+        try {
+            double valorTotal=0;
+            for(Item item:itens){
+                valorTotal+=item.getValorTotal();
+            }
+            valorTotal+=(taxaDeEntrega-descontoConcedido());
+            valorTotal-=valorTotal*cupomDescontoPedido.getPercentual();
+            return valorTotal;
+        }catch (RuntimeException e){
+            double valorTotal=0;
+            for(Item item:itens){
+                valorTotal+=item.getValorTotal();
+            }
+            valorTotal+=(taxaDeEntrega-descontoConcedido());
+            return valorTotal;
         }
-        return valorTotal;
     }
+
     public Cliente getCliente() {
         return cliente;
     }
@@ -57,8 +71,12 @@ public class Pedido {
         return cupomDescontoEntrega;
     }
 
+    public void setCupomDescontoPedido(CupomDescontoPedido cupomDescontoPedido) {
+        this.cupomDescontoPedido = cupomDescontoPedido;
+    }
+
     @Override
     public String toString() {
-        return "Taxa entrega: " + taxaDeEntrega + ", Valor pedido: " +getValorPedido() + ", Total desconto: " + descontoConcedido();
+        return "Taxa entrega: " + (taxaDeEntrega-descontoConcedido()) + ", Valor pedido: " +getValorPedido() + ", Total desconto: " + descontoConcedido();
     }
 }
